@@ -91,7 +91,7 @@ class AutonomousRacingNode(Node):
         self.bridge = CvBridge()
         # Load your trained model 
         self.model = Net()
-        self.model.load_state_dict(torch.load('scripts/scripts/steer_net_2.pth', weights_only=True))
+        self.model.load_state_dict(torch.load('steer_net_2.pth', weights_only=True))
         self.model.eval()
 
     def joy_callback(self, msg):

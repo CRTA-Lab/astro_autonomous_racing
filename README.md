@@ -23,7 +23,7 @@ Make sure you are inside **astro_ws/src** folder:
 
 ```bash
 cd ~/astro_ws/src
-git clone -b humble https://github.com/CRTA-Lab/astro_autonomous_racing.git
+git clone https://github.com/CRTA-Lab/astro_autonomous_racing.git
 ```
 
 **Installing dependencies**
@@ -157,7 +157,7 @@ scp -r astro@192.168.0.13:/home/astro/astro_ws/src/bags/rosbag2_2026_03_24-14_08
 
 In order to prepare the dataset, the recoreded **bag** needs to be transformed firstly into visible data/ images stored in the  ``` your_ws/images ``` .
 
-The visible data - images with the specific names:  ```**{image_id}_{cmd_vel.anglular.z}.jpg**```
+The visible data - images with the specific names:  **```{image_id}_{cmd_vel.anglular.z}.jpg```**
 
 The images are cropped to the bottom 1/3 because that is the most important part of an image for the model train.
 
@@ -167,6 +167,8 @@ Using **data_preparation**:
 cd ~/astro_ws/
 ros2 run astro_autonomous_racing data_preparation <bag_folder_path> ./images
 ```
+
+Now open the ```./images``` and scan through the images. Now you can clean the dataset if there are some images with wrong ```cmd_vel.angular.z``` (usually on the start and the end of the record, when the robot is not moving and stored speed is 0.000).
 
 ## 3. Train the model
 
@@ -263,3 +265,13 @@ The deployment script - ```autonomous_racing.py``` have multiple segments:
 ```
 
 **Your goal is to be faster than others**
+
+Start the node:
+
+```bash
+ros2 run astro_autonomous_racing autonomous_racing_node
+```
+
+ASTRO control:
+- **UP arrow** - START
+- **DOWN arrow** - STOP
