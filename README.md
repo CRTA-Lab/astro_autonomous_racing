@@ -170,6 +170,15 @@ ros2 run astro_autonomous_racing data_preparation <bag_folder_path> ./images
 
 ## 3. Train the model
 
+
+To train the model, firsty clone the **ASTRO_autonomous_racing_model_training_scripts** repo:
+
+```bash
+cd ~/astro_ws/
+git clone https://github.com/lukasiktar/ASTRO_autonomous_racing_model_training_scripts.git
+```
+
+
 As the reference for classification model train use Pytorch's [Training a Classifier](https://docs.pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html)
 
 The goal of this part is to get familiar with, train and fine tune the classifier for your needs.
@@ -178,13 +187,13 @@ Model trainer have 1 main script ```train_net_crta.py``` with 2 helper scripts `
 
 ### 3.1. Split the created dataset into train/test
 
-```splitter.py``` splits the images dataset into ```images/train``` and ```images/val``` in 80:20 ratio.
+```splitter.py``` splits the images dataset into ```images/train``` and ```images/val```.
 
 Usage:
 
 ```bash
 cd ~/astro_ws/
-python3 model_training_scripts/splitter.py
+python3 ASTRO_autonomous_racing_model_training_scripts/splitter.py
 ```
 
 ### 3.2 (Optional) Modify the ```steerDS_crta.py``` if needed.
@@ -205,11 +214,11 @@ Model training script - ```train_net_crta.py``` have multiple segments:
 Start model training procedure:
 ```bash
 cd ~/astro_ws/
-python3 model_training_scripts/train_net_crta.py
+python3 ASTRO_autonomous_racing_model_training_scripts/train_net_crta.py
 ```
 
 
-The trained model will be stored into ```model_training_scripts/<model_name>.pth```
+The trained model will be stored into ```ASTRO_autonomous_racing_model_training_scripts/<model_name>.pth```
 
 
 ## 4. Deploy autonomous racing model to ASTRO
