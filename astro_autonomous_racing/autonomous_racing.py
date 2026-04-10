@@ -91,7 +91,7 @@ class AutonomousRacingNode(Node):
         self.bridge = CvBridge()
         # Load your trained model 
         self.model = Net()
-        self.model.load_state_dict(torch.load('scripts/scripts/steer_net_2.pth', weights_only=True))
+        self.model.load_state_dict(torch.load('steer_net_2.pth', weights_only=True))
         self.model.eval()
 
     def joy_callback(self, msg):
@@ -143,22 +143,22 @@ class AutonomousRacingNode(Node):
            
             #Convert the predicted class to a steering angle (this mapping depends on how you trained your model)
             if preds.item() == 0:
-                angle = 0.8 
+                angle = 0.6 
                 
             elif preds.item() == 1:
-                angle = 0.5 
+                angle = 0.4 
                  
             elif preds.item() == 2:
                 angle = 0
                 
             elif preds.item() == 3:
-                angle = -0.5 
+                angle = -0.4 
                  
             elif preds.item() == 4:
-                angle = -0.8 
+                angle = -0.6 
 
         #Set the linear velocity and angular velocity based on the predicted steering angle  
-        twist_msg.linear.x = 0.25
+        twist_msg.linear.x = 0.3
         twist_msg.angular.z = float(angle)
 
         # Publish the steering command

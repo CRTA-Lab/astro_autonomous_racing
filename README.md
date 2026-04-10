@@ -2,17 +2,17 @@
 
 ROS2 Python package for autonomous ASTRO robot racing.
 Includes one node and two main scripts callable from ROS2:
-- **data_preparation** - the script that prepares the bagged data for model train
+- **data_preparation** - the script that prepares the bagged data for model training
 - **splitter.py** - the script that splits the prepared dataset into the train/test
-- **steerDS_crta.py** - the helper script that prepares the training dataest - remaps the steering angle velocity (cmd_vel.angular.z) into the 5 classifications (sharp_left, left. straight, right, sharp_right) 
-- **train_net_crta.py** - the script that trains the classifcation neural network model
-- **autonomous_racing** - autonomous racing deploy of trained classification model
+- **steerDS_crta.py** - the helper script that prepares the training dataset - remaps the steering angle velocity (cmd_vel.angular.z) into the 5 classifications (sharp_left, left. straight, right, sharp_right) 
+- **train_net_crta.py** - the script that trains the classification neural network model
+- **autonomous_racing** - autonomous racing deployment of trained classification model
 
 This exercise is created by Luka Šiktar, Janko Jurdana with help of Branimir Ćaran.
 
 ---
 
-This ROS2 package demonstrates ASTRO CNN-based autonomous racing. The main goal of the exercise is to record the model training data by driving the robot along the track and saving the visual and odometry data using **ros2 bag**. The recorded **bag** is then preprocessed to ensure the training dataset for Pytorch-based classification network that steers the robots. The classificaiton network learns by the example: The operator drives the robot and stores the images and speeds (linear and angular). Based on images and speeds remapped into 5 classes (sharp left, left, straight, right, sharp right), the model trains to classify each image to enable autonomous steering. The trained model is then deployed on ASTRO robot.
+This ROS2 package demonstrates ASTRO CNN-based autonomous racing. The main goal of the exercise is to record the model training data by driving the robot along the track and saving the visual and odometry data using **ros2 bag**. The recorded **bag** is then preprocessed to ensure the training dataset for PyTorch-based classification network that steers the robots. The classification network learns by the example: The operator drives the robot and stores the images and speeds (linear and angular). Based on images and speeds remapped into 5 classes (sharp left, left, straight, right, sharp right), the model trains to classify each image to enable autonomous steering. The trained model is then deployed on ASTRO robot.
 
 
 ## 0. Download the package into the existing **astro_ws**
@@ -155,9 +155,9 @@ scp -r astro@192.168.0.13:/home/astro/astro_ws/src/bags/rosbag2_2026_03_24-14_08
 
 ## 2. Prepare the dataset
 
-In order to prepare the dataset, the recoreded **bag** needs to be transformed firstly into visible data/ images stored in the  ``` your_ws/images ``` .
+In order to prepare the dataset, the recorded **bag** needs to be transformed firstly into visible data/ images stored in the  ``` your_ws/images ``` .
 
-The visible data - images with the specific names:  ```**{image_id}_{cmd_vel.anglular.z}.jpg**```
+The visible data - images with the specific names:  ```**{image_id}_{cmd_vel.angular.z}.jpg**```
 
 The images are cropped to the bottom 1/3 because that is the most important part of an image for the model train.
 
@@ -171,7 +171,7 @@ ros2 run astro_autonomous_racing data_preparation <bag_folder_path> ./images
 ## 3. Train the model
 
 
-To train the model, firsty clone the **ASTRO_autonomous_racing_model_training_scripts** repo:
+To train the model, firstly clone the **ASTRO_autonomous_racing_model_training_scripts** repo:
 
 ```bash
 cd ~/astro_ws/
@@ -179,11 +179,11 @@ git clone https://github.com/lukasiktar/ASTRO_autonomous_racing_model_training_s
 ```
 
 
-As the reference for classification model train use Pytorch's [Training a Classifier](https://docs.pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html)
+As the reference for classification model train use PyTorch's [Training a Classifier](https://docs.pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html)
 
 The goal of this part is to get familiar with, train and fine tune the classifier for your needs.
 
-Model trainer have 1 main script ```train_net_crta.py``` with 2 helper scripts ```splitter.py``` and ```steerDS_crta.py```.
+Model trainer has 1 main script ```train_net_crta.py``` with 2 helper scripts ```splitter.py``` and ```steerDS_crta.py```.
 
 ### 3.1. Split the created dataset into train/test
 
@@ -198,17 +198,19 @@ python3 ASTRO_autonomous_racing_model_training_scripts/splitter.py
 
 ### 3.2 (Optional) Modify the ```steerDS_crta.py``` if needed.
 
-```steerDS_crta.py``` script describes the remappingg between the steering ```{cmd_vel.angular.z}```  to ``` self.class_labels = ['sharp left', 'left', 'straight', 'right', 'sharp right', 'stop']```
+```steerDS_crta.py``` script describes the remapping between the steering ```{cmd_vel.angular.z}```  to ``` self.class_labels = ['sharp left', 'left', 'straight', 'right', 'sharp right', 'stop']```
 
 
 ### 3.3 Train the model
 
-Model training script - ```train_net_crta.py``` have multiple segments:
+![Neural Net Description](images/neural_net_decription.png)
+
+Model training script - ```train_net_crta.py``` has multiple segments:
 - **```SETTING UP THE DATASET```** - This part of the script sets up the transformations on raw images from /train /val folders to be prepared as inputs to the model. It sets up the train and validation datasets and displays the dataset's class balance and the start. **Do not change this segment**
-- **```CONFIGURE CLASSIFICATION MODEL ARCHITECTURE```** - This part confiures the model architecture. Here **you** should specify the architecture. For the reference use this [PyTorch Classifer Tutorial]((https://docs.pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html))
+- **```CONFIGURE CLASSIFICATION MODEL ARCHITECTURE```** - This part configures the model architecture. Here **you** should specify the architecture. For the reference use this [PyTorch Classifier Tutorial]((https://docs.pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html))
 - **```TRAINING HYPERPARAMETERS```** - Here **you** specify the model training hyperparameters: Loss function as criterion, optimizer, number of epochs.
 - **```TRAINING```** - Model train segment. Here **you** specify the name of saved trained model. ```<model_name>.pth```
-- **```VALIDATION```** - Validation segment, displays the confusion matrix. **Do not chnage this segment**
+- **```VALIDATION```** - Validation segment, displays the confusion matrix. **Do not change this segment**
 
 
 Start model training procedure:
@@ -225,8 +227,10 @@ The trained model will be stored into ```ASTRO_autonomous_racing_model_training_
 
 Deploy the trained model ```<model_name>.pth``` to the ASTRO for autonomous racing using ```autonomous_racing_node``` specified in  ```autonomous_racing.py```.
 
+![Autonomous Racing Description](images/autonomous_racing_description.png)
+
 The deployment script - ```autonomous_racing.py``` have multiple segments:
-- **```SETTING UP THE TRANSFORMATIONS AND MODEL```** - This segment is copy-paste from ```train_net_crta.py``` and it specifies the input transformations (also neccessary for the transformation of raw images that are fed to model), and model architecture (neccessary to specify the model architecture in order to create model and load the trained data from ```<model_name>.pth```)
+- **```SETTING UP THE TRANSFORMATIONS AND MODEL```** - This segment is copy-paste from ```train_net_crta.py``` and it specifies the input transformations (also necessary for the transformation of raw images that are fed to model), and model architecture (neccessary to specify the model architecture in order to create model and load the trained data from ```<model_name>.pth```)
 - **```AUTONOMOUS RACING NODE```** - ROS2 node for autonomous racing. Here **you** should apply the logic that will interpret the classification model output to the steering angles. This is one of the solutions:
 
 ```bash
