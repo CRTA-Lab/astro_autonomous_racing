@@ -9,6 +9,7 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import CompressedImage,Joy
 from geometry_msgs.msg import Twist
+from std_msgs.msg import String
 from cv_bridge import CvBridge
 import torch
 import cv2
@@ -83,6 +84,20 @@ class AutonomousRacingNode(Node):
             self.joy_callback,
             10
         )
+
+        self.state_sub = self.create_subscription(
+            String,
+            '/velocity_controller/state',
+            self.state_callback,
+            10
+        )
+
+        self.velocity_rate_sub = self.create_subscription(
+            Twist,
+            '/velocity_controller/speed_rates',
+            self.velocity_rate_callback,
+            10
+        )
         
         self.publisher = self.create_publisher(Twist, 
             '/cmd_vel_joy', 
@@ -93,6 +108,19 @@ class AutonomousRacingNode(Node):
         self.model = Net()
         self.model.load_state_dict(torch.load('steer_net_2.pth', weights_only=True))
         self.model.eval()
+
+
+        self.linear_speed = 0.0
+        self.angular_speed = 0.0
+
+    def state_callback(self, msg):
+        self.driving_enabled = msg.data == "True"
+        self.get_logger().info(f"State: {self.driving_enabled}")
+
+
+    def velocity_rate_callback(self, msg):
+        self.linear_speed = msg.linear.x
+        self.angular_speed = msg.angular.z
 
     def joy_callback(self, msg):
         # Button 0 = X on PS4 / A on Xbox — change index to whatever button you want
@@ -105,6 +133,7 @@ class AutonomousRacingNode(Node):
             print("STOP")
             self.driving_enabled = False
             state = 'DISABLED'
+            
 
         # if msg.axes[6] == 1.0:
         #     print("Lijevo")
@@ -143,22 +172,22 @@ class AutonomousRacingNode(Node):
            
             #Convert the predicted class to a steering angle (this mapping depends on how you trained your model)
             if preds.item() == 0:
-                angle = 0.6 
+                angle = self.angular_speed
                 
             elif preds.item() == 1:
-                angle = 0.4 
+                angle = self.angular_speed*0.6
                  
             elif preds.item() == 2:
-                angle = 0
+                angle = self.angular_speed*0.0
                 
             elif preds.item() == 3:
-                angle = -0.4 
+                angle = -self.angular_speed*0.6
                  
             elif preds.item() == 4:
-                angle = -0.6 
+                angle = -self.angular_speed
 
         #Set the linear velocity and angular velocity based on the predicted steering angle  
-        twist_msg.linear.x = 0.3
+        twist_msg.linear.x = self.linear_speed
         twist_msg.angular.z = float(angle)
 
         # Publish the steering command
